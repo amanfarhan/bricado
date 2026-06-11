@@ -9,7 +9,7 @@ import Image from 'next/image'
 gsap.registerPlugin(ScrollTrigger)
 
 const TOTAL_FRAMES = 240
-const SCROLL_MULTIPLIER = '450vh'
+const SCROLL_MULTIPLIER = '800vh'
 
 function frameSrc(n: number) {
   return `/hero-sequence/ezgif-frame-${String(n).padStart(3, '0')}.jpg`
@@ -90,7 +90,10 @@ export function HeroSection() {
 
     const setSize = () => {
       const W = window.innerWidth
-      const H = window.innerHeight
+      // Measure the stable sticky container instead of window.innerHeight to prevent resizing
+      const container = sectionRef.current?.querySelector('.sticky')
+      const H = container ? container.clientHeight : window.innerHeight
+      
       canvas.width = W
       canvas.height = H
       dimensionsRef.current = { W, H }
@@ -244,27 +247,11 @@ export function HeroSection() {
     }
 
     // ── SCROLLTRIGGER ──────────────────────────────────────────────────────
-    //
-    // Snap points correspond to natural story beats in the animation:
-    //   0.00 → start
-    //   0.28 → "WHEN VISIBILITY FADES" scene fully played (frame ~67)
-    //   0.56 → wiper sweep complete, "PRECISION TAKES OVER" done (frame ~134)
-    //   0.78 → "ENGINEERED / SILENT" sequence done (frame ~186)
-    //   1.00 → BRICADO brand reveal complete
-    //
-    const SNAP_POINTS = [0, 0.28, 0.56, 0.78, 1]
-
     const st = ScrollTrigger.create({
       trigger: section,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 1,
-      snap: {
-        snapTo: SNAP_POINTS,
-        duration: { min: 0.8, max: 2.4 }, // slow, cinematic snap travel
-        delay: 0.08,                       // fires quickly after scroll stops
-        ease: 'power3.inOut',
-      },
+      scrub: 1.5, // Increased from 1 for buttery smooth cinematic interpolation
       onUpdate: (self) => {
         progressRef.current = self.progress
         const rawF = self.progress * (TOTAL_FRAMES - 1)
@@ -420,12 +407,12 @@ export function HeroSection() {
         style={{ height: SCROLL_MULTIPLIER }}
         aria-label="Cinematic windshield wipe hero"
       >
-        <div className="sticky top-0 h-[100dvh] overflow-hidden bg-[#070707]">
+        <div className="sticky top-0 h-[100vh] overflow-hidden bg-[#070707]">
 
           {/* Frame canvas — the windshield sequence */}
           <canvas
             ref={canvasRef}
-            className="absolute inset-0 w-full h-full"
+            className="absolute inset-0 w-full h-full will-change-transform [transform:translateZ(0)]"
             aria-hidden="true"
           />
 
@@ -462,7 +449,7 @@ export function HeroSection() {
           {/* ── TEXT LAYER 2a — "PRECISION TAKES OVER" blurred (behind glass) */}
           <div
             ref={text2BlurRef}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+            className="absolute inset-0 flex items-center justify-center pointer-events-none select-none will-change-[opacity,filter] [transform:translateZ(0)]"
             style={{ opacity: 0, filter: 'blur(9px)' }}
           >
             <p
@@ -475,7 +462,7 @@ export function HeroSection() {
           {/* ── TEXT LAYER 2b — "PRECISION TAKES OVER" wipe-revealed (sharp) */}
           <div
             ref={text2SharpRef}
-            className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+            className="absolute inset-0 flex items-center justify-center pointer-events-none select-none will-change-[opacity,clip-path] [transform:translateZ(0)]"
             style={{ opacity: 0, clipPath: 'path("M 0 0")' }}
           >
             <p
