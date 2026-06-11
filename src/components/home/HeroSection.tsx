@@ -258,7 +258,7 @@ export function HeroSection() {
       trigger: section,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 1.6,
+      scrub: 1,
       snap: {
         snapTo: SNAP_POINTS,
         duration: { min: 0.8, max: 2.4 }, // slow, cinematic snap travel
@@ -279,7 +279,13 @@ export function HeroSection() {
     updateText(0)
 
     // Resize handler — recalculate dimensions and redraw
+    let lastWidth = window.innerWidth
     const onResize = () => {
+      // Ignore height-only resizes on mobile to prevent address bar jitter
+      const isMobile = window.innerWidth <= 768
+      if (isMobile && window.innerWidth === lastWidth) return
+      lastWidth = window.innerWidth
+
       setSize()
       drawInterpolated(progressRef.current * (TOTAL_FRAMES - 1))
       updateText(progressRef.current * (TOTAL_FRAMES - 1))
@@ -414,7 +420,7 @@ export function HeroSection() {
         style={{ height: SCROLL_MULTIPLIER }}
         aria-label="Cinematic windshield wipe hero"
       >
-        <div className="sticky top-0 h-screen overflow-hidden bg-[#070707]">
+        <div className="sticky top-0 h-[100dvh] overflow-hidden bg-[#070707]">
 
           {/* Frame canvas — the windshield sequence */}
           <canvas
