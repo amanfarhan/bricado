@@ -66,7 +66,7 @@ export function Navbar() {
             ? 'bg-dark-deep/90 backdrop-blur-xl border-b border-dark-border'
             : 'bg-transparent'
         } ${
-          inHero ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          inHero ? 'lg:opacity-0 lg:pointer-events-none' : 'opacity-100'
         }`}
       >
         <nav className="max-w-8xl mx-auto px-6 lg:px-10 h-16 lg:h-20 flex items-center justify-between">
@@ -139,16 +139,16 @@ export function Navbar() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ clipPath: 'inset(0 0 100% 0)' }}
-            animate={{ clipPath: 'inset(0 0 0% 0)' }}
-            exit={{ clipPath: 'inset(0 0 100% 0)' }}
-            transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ duration: 0.45, ease: [0.76, 0, 0.24, 1] }}
             className="fixed inset-0 z-[60] flex flex-col overflow-y-auto"
             style={{ background: '#07070a' }}
           >
             {/* ── Decorative layers ───────────────────────── */}
             {/* Grid */}
-            <div className="absolute inset-0 grid-lines opacity-[0.06]" />
+            <div className="absolute inset-0 grid-lines opacity-[0.06] pointer-events-none" />
             {/* Orange glow — bottom right */}
             <div
               className="absolute bottom-0 right-0 w-[340px] h-[340px] rounded-full pointer-events-none"
