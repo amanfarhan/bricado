@@ -143,7 +143,7 @@ export function Navbar() {
             animate={{ clipPath: 'inset(0 0 0% 0)' }}
             exit={{ clipPath: 'inset(0 0 100% 0)' }}
             transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
-            className="fixed inset-0 z-40 flex flex-col overflow-hidden"
+            className="fixed inset-0 z-[60] flex flex-col overflow-y-auto"
             style={{ background: '#07070a' }}
           >
             {/* ── Decorative layers ───────────────────────── */}
@@ -207,6 +207,7 @@ export function Navbar() {
                 >
                   <Link
                     href={link.href}
+                    onClick={() => setMenuOpen(false)}
                     className={`group flex items-center justify-between py-4 border-b transition-colors duration-200 ${
                       pathname === link.href
                         ? 'border-orange/30'
