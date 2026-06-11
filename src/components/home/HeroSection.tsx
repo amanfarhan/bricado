@@ -593,7 +593,7 @@ export function HeroSection() {
           {/* ── SCROLL INDICATOR ─────────────────────────────────────────── */}
           <div
             ref={scrollIndicatorRef}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none"
+            className="hidden md:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 pointer-events-none"
           >
             <span className="text-[8px] text-white/35 tracking-[0.35em] font-medium">SCROLL</span>
             <div className="relative w-px h-12 overflow-hidden bg-white/15">

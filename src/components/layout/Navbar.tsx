@@ -66,7 +66,7 @@ export function Navbar() {
             ? 'bg-dark-deep/90 backdrop-blur-xl border-b border-dark-border'
             : 'bg-transparent'
         } ${
-          inHero ? 'lg:opacity-0 lg:pointer-events-none' : 'opacity-100'
+          inHero ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
       >
         <nav className="max-w-8xl mx-auto px-6 lg:px-10 h-16 lg:h-20 flex items-center justify-between">
