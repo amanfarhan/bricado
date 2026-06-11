@@ -65,15 +65,13 @@ export function Navbar() {
           scrolled
             ? 'bg-dark-deep/90 backdrop-blur-xl border-b border-dark-border'
             : 'bg-transparent'
+        } ${
+          inHero ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
       >
         <nav className="max-w-8xl mx-auto px-6 lg:px-10 h-16 lg:h-20 flex items-center justify-between">
-          {/* Logo — hidden on desktop during hero, always visible on mobile */}
-          <Link
-            href="/"
-            className={`flex items-center transition-all duration-500 ${inHero ? 'lg:opacity-0 lg:pointer-events-none' : ''}`}
-            aria-label="Bricado Home"
-          >
+          {/* Logo */}
+          <Link href="/" className="flex items-center" aria-label="Bricado Home">
             <Image
               src="/logo-white.png"
               alt="Bricado"
@@ -84,8 +82,8 @@ export function Navbar() {
             />
           </Link>
 
-          {/* Desktop Nav — hidden during hero */}
-          <div className={`hidden lg:flex items-center gap-8 transition-all duration-500 ${inHero ? 'opacity-0 pointer-events-none' : ''}`}>
+          {/* Desktop Nav */}
+          <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -108,7 +106,7 @@ export function Navbar() {
           <div className="flex items-center gap-4">
             <Link
               href="/distribution"
-              className={`hidden lg:inline-flex items-center gap-2 bg-orange text-dark-deep text-xs font-bold tracking-widest uppercase px-5 py-2.5 transition-all duration-300 hover:bg-orange-light hover:shadow-lg hover:shadow-orange/20 ${inHero ? 'lg:opacity-0 lg:pointer-events-none' : ''}`}
+              className="hidden lg:inline-flex items-center gap-2 bg-orange text-dark-deep text-xs font-bold tracking-widest uppercase px-5 py-2.5 transition-all duration-300 hover:bg-orange-light hover:shadow-lg hover:shadow-orange/20"
             >
               Partner With Us
             </Link>
@@ -141,10 +139,10 @@ export function Navbar() {
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ duration: 0.45, ease: [0.76, 0, 0.24, 1] }}
+            initial={{ clipPath: 'inset(0 0 100% 0)' }}
+            animate={{ clipPath: 'inset(0 0 0% 0)' }}
+            exit={{ clipPath: 'inset(0 0 100% 0)' }}
+            transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
             className="fixed inset-0 z-40 flex flex-col overflow-hidden"
             style={{ background: '#07070a' }}
           >

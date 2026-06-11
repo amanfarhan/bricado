@@ -15,11 +15,6 @@ function frameSrc(n: number) {
   return `/hero-sequence/ezgif-frame-${String(n).padStart(3, '0')}.jpg`
 }
 
-// Max frames to advance per requestAnimationFrame tick.
-// At 60 fps: 1.0 × 60 = 60 effective fps → full 240-frame sequence takes ≥ 4 s.
-// This caps playback speed so fast scrolling never skips frames.
-const MAX_FRAME_SPEED = 1.0
-
 export function HeroSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -39,11 +34,7 @@ export function HeroSection() {
   const ctaRef = useRef<HTMLDivElement>(null)
   const scrollIndicatorRef = useRef<HTMLDivElement>(null)
 
-  // Velocity-limited playback refs
-  const targetFrameRef = useRef(0)   // set by ScrollTrigger
-  const displayFrameRef = useRef(0)  // what is actually rendered (lags behind target at MAX_FRAME_SPEED)
-  const rafRef = useRef<number>(0)
-
+  // Live state refs
   const currentFrameRef = useRef(0)
   const dimensionsRef = useRef({ W: 0, H: 0 })
   const progressRef = useRef(0)
@@ -51,11 +42,12 @@ export function HeroSection() {
   // ── PRELOAD ───────────────────────────────────────────────────────────────
   useEffect(() => {
     let loaded = 0
-    const CIRCUMFERENCE = 2 * Math.PI * 46 // r=46, computed once
 
     for (let i = 0; i < TOTAL_FRAMES; i++) {
       const img = new window.Image()
       img.src = frameSrc(i + 1)
+
+      const CIRCUMFERENCE = 2 * Math.PI * 46 // r=46 → 289.03
 
       const done = () => {
         loaded++
@@ -251,67 +243,50 @@ export function HeroSection() {
       }
     }
 
-    // ── VELOCITY-LIMITED RAF LOOP ──────────────────────────────────────────
-    // Renders at MAX_FRAME_SPEED frames per tick regardless of how fast the
-    // user scrolls, giving a consistent cinematic playback speed.
-    const animLoop = () => {
-      const target = targetFrameRef.current
-      const cur = displayFrameRef.current
-      const diff = target - cur
-
-      if (Math.abs(diff) > 0.05) {
-        const step = Math.sign(diff) * Math.min(Math.abs(diff), MAX_FRAME_SPEED)
-        const next = cur + step
-        displayFrameRef.current = next
-        currentFrameRef.current = Math.round(next)
-        drawInterpolated(next)
-        updateText(next)
-      }
-
-      rafRef.current = requestAnimationFrame(animLoop)
-    }
-    drawInterpolated(0)
-    updateText(0)
-    rafRef.current = requestAnimationFrame(animLoop)
-
     // ── SCROLLTRIGGER ──────────────────────────────────────────────────────
-    // scrub:true = instant progress tracking (RAF handles the visual smoothing)
-    // Snap points correspond to natural story beats:
+    //
+    // Snap points correspond to natural story beats in the animation:
     //   0.00 → start
-    //   0.28 → "WHEN VISIBILITY FADES" scene complete (frame ~67)
-    //   0.56 → wiper sweep done, "PRECISION TAKES OVER" done (frame ~134)
+    //   0.28 → "WHEN VISIBILITY FADES" scene fully played (frame ~67)
+    //   0.56 → wiper sweep complete, "PRECISION TAKES OVER" done (frame ~134)
     //   0.78 → "ENGINEERED / SILENT" sequence done (frame ~186)
-    //   1.00 → BRICADO brand reveal
+    //   1.00 → BRICADO brand reveal complete
+    //
     const SNAP_POINTS = [0, 0.28, 0.56, 0.78, 1]
 
     const st = ScrollTrigger.create({
       trigger: section,
       start: 'top top',
       end: 'bottom bottom',
-      scrub: true,
+      scrub: 1.6,
       snap: {
         snapTo: SNAP_POINTS,
-        duration: { min: 1.0, max: 2.8 },
-        delay: 0.1,
+        duration: { min: 0.8, max: 2.4 }, // slow, cinematic snap travel
+        delay: 0.08,                       // fires quickly after scroll stops
         ease: 'power3.inOut',
       },
       onUpdate: (self) => {
         progressRef.current = self.progress
-        // Only update the target — RAF loop renders at controlled speed
-        targetFrameRef.current = self.progress * (TOTAL_FRAMES - 1)
+        const rawF = self.progress * (TOTAL_FRAMES - 1)
+        currentFrameRef.current = Math.round(rawF)
+        drawInterpolated(rawF)
+        updateText(rawF)
       },
     })
 
-    // Resize handler
+    // Initial render
+    drawInterpolated(0)
+    updateText(0)
+
+    // Resize handler — recalculate dimensions and redraw
     const onResize = () => {
       setSize()
-      // Re-draw current display frame at new dimensions
-      drawInterpolated(displayFrameRef.current)
+      drawInterpolated(progressRef.current * (TOTAL_FRAMES - 1))
+      updateText(progressRef.current * (TOTAL_FRAMES - 1))
     }
     window.addEventListener('resize', onResize, { passive: true })
 
     return () => {
-      cancelAnimationFrame(rafRef.current)
       st.kill()
       window.removeEventListener('resize', onResize)
     }
@@ -471,7 +446,7 @@ export function HeroSection() {
             style={{ opacity: 0 }}
           >
             <p
-              className="font-display text-[clamp(1.5rem,2.4vw,2.6rem)] font-medium uppercase text-white leading-none tracking-[0.15em] text-center"
+              className="font-display text-[clamp(1.1rem,2.4vw,2.6rem)] font-medium uppercase text-white leading-none tracking-[0.22em] text-center"
               style={{ letterSpacing: '0.22em' }}
             >
               WHEN VISIBILITY FADES
@@ -485,7 +460,7 @@ export function HeroSection() {
             style={{ opacity: 0, filter: 'blur(9px)' }}
           >
             <p
-              className="font-display text-[clamp(2.4rem,5.5vw,7.5rem)] font-bold uppercase text-white leading-[0.92] tracking-[0.08em] text-center"
+              className="font-display text-[clamp(2.2rem,5.5vw,7.5rem)] font-bold uppercase text-white leading-[0.92] tracking-[0.1em] text-center"
             >
               PRECISION<br />TAKES OVER
             </p>
@@ -498,7 +473,7 @@ export function HeroSection() {
             style={{ opacity: 0, clipPath: 'path("M 0 0")' }}
           >
             <p
-              className="font-display text-[clamp(2.4rem,5.5vw,7.5rem)] font-bold uppercase text-white leading-[0.92] tracking-[0.08em] text-center"
+              className="font-display text-[clamp(2.2rem,5.5vw,7.5rem)] font-bold uppercase text-white leading-[0.92] tracking-[0.1em] text-center"
               style={{ textShadow: '0 0 60px rgba(255,255,255,0.18), 0 0 120px rgba(247,148,29,0.08)' }}
             >
               PRECISION<br />TAKES OVER
@@ -512,7 +487,7 @@ export function HeroSection() {
             style={{ opacity: 0 }}
           >
             <p
-              className="font-display text-[clamp(1.4rem,2.1vw,2.4rem)] font-semibold uppercase text-white leading-none tracking-[0.15em] text-center px-4"
+              className="font-display text-[clamp(1rem,2.1vw,2.4rem)] font-semibold uppercase text-white leading-none tracking-[0.2em] text-center"
             >
               ENGINEERED FOR EVERY STORM
             </p>
@@ -530,7 +505,7 @@ export function HeroSection() {
                   key={line}
                   className="font-display font-light uppercase text-white leading-[1.2] tracking-[0.3em]"
                   style={{
-                    fontSize: 'clamp(2rem,3.8vw,5rem)',
+                    fontSize: 'clamp(1.6rem,3.8vw,5rem)',
                     marginTop: i > 0 ? '0.08em' : 0,
                   }}
                 >
