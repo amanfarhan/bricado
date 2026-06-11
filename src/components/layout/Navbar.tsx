@@ -15,8 +15,8 @@ const navLinks = [
   { href: '/contact', label: 'Contact' },
 ]
 
-// Hero section is 450vh tall; navbar stays hidden until past it (450vh - 100vh = 350vh)
-const HERO_SCROLL_END_VH = 3.5
+// Hero section is 800vh tall; navbar stays hidden until past it (800vh - 100vh = 700vh)
+const HERO_SCROLL_END_VH = 7.0
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -66,7 +66,7 @@ export function Navbar() {
             ? 'bg-dark-deep/90 backdrop-blur-xl border-b border-dark-border'
             : 'bg-transparent'
         } ${
-          inHero ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          inHero ? 'opacity-0 pointer-events-none lg:opacity-100 lg:pointer-events-auto' : 'opacity-100'
         }`}
       >
         <nav className="max-w-8xl mx-auto px-6 lg:px-10 h-16 lg:h-20 flex items-center justify-between">
